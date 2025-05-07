@@ -18,7 +18,9 @@ const pool = new pg.Pool({
 
 console.log("Connecting...:")
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:8080'
+}));
 app.use(bodyParser.json());
 app.use(
     bodyParser.urlencoded({
@@ -30,14 +32,15 @@ app.get('/authenticate/:username/:password', async (request, response) => {
     const username = request.params.username;
     const password = request.params.password;
 
-    const query = `SELECT * FROM users WHERE user_name='${username}' and password='${password}'`;
-    console.log(query);
-    pool.query(query, (error, results) => {
+    const query = 'SELECT * FROM users WHERE user_name=$1 AND password=$2';
+    const values = [username, password];
+
+    pool.query(query, values, (error, results) => {
       if (error) {
-        throw error
+        throw error;
       }
-      response.status(200).json(results.rows)});
-      
+      response.status(200).json(results.rows);
+    });
 });
 
 app.listen(port, () => {
